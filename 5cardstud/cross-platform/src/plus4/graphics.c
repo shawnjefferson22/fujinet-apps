@@ -78,7 +78,7 @@ void clearStatusBar()
     memset((unsigned char *)SCREEN_LOC+920,0x80,80);
 }
 
-void drawStatusTextAt(unsigned char x, char* s)
+void drawStatusTextAt(unsigned char x, const char* s)
 {
     static unsigned char j,split;
     SET_COL(COL_BLACK);
@@ -105,7 +105,7 @@ void drawStatusTextAt(unsigned char x, char* s)
     }
 }
 
-void drawStatusText(char* s)
+void drawStatusText(const char* s)
 {
     clearStatusBar();
     drawStatusTextAt(0, s);
@@ -230,14 +230,15 @@ void drawChip(unsigned char x, unsigned char y)
 
 void drawLine(unsigned char x, unsigned char y, unsigned char w)
 {
-    unsigned char o = y > 22 ? 0x80 : 0x00;
-    unsigned char c = y > 22 ? 0x80 : 0xFF; // Yellow multicolor
     unsigned char *loc = SCR + y*40+x;
-    unsigned char *cloc = SCREEN_COLORRAM_LOC + y*40+x;
-
+    unsigned char *cloc = loc-(SCR-SCREEN_COLORRAM_LOC);
+    unsigned char c = y > 22 ? 0x08 : 0xFF; // Yellow multicolor above status bar
+    
+    unsigned char o;
     while(w--)
     {
-        *loc++ = 0x41 + o;
+        o = y > 22 ? 0x5B : *loc<0x41 ? 0xC0 : *loc<0xC0 ? (*loc)+0x50 : *loc; 
+        *loc++ = o;
         *cloc++ = c;
     }
 }
@@ -245,13 +246,13 @@ void drawLine(unsigned char x, unsigned char y, unsigned char w)
 void hideLine(unsigned char x, unsigned char y, unsigned char w)
 {
     unsigned char o = y > 22 ? 0x80 : 0x00;
-    unsigned char c = y > 22 ? 0x80 : 0x08; // black multicolor
+    unsigned char c = y > 22 ? 0x08 : 0x08; // black multicolor
     unsigned char *loc = SCR + y*40+x;
-    unsigned char *cloc = SCREEN_COLORRAM_LOC + y*40+x;
+    unsigned char *cloc = loc-(SCR-SCREEN_COLORRAM_LOC);
 
     while(w--)
     {
-        *loc++ = 0x00 + o;
+        *loc++ = o;
         *cloc++ = c;
     }
 }
